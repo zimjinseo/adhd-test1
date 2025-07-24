@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>성인 여성 ADHD 자가진단</title>
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    background-color: #5e0f7b;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 0;
+  }
+  .container {
+    max-width: 700px;
+    margin: 30px auto 0 auto;
+    background-color: #3c024e;
+    border-radius: 20px;
+    padding: 30px;
+  }
+  h1 {
+    font-size: 24px;
+    margin-bottom: 30px;
+  }
+  .question {
+    font-size: 18px;
+    margin: 30px 0 15px;
+    line-height: 1.6;
+  }
+  .btn {
+    display: block;
+    margin: 10px auto;
+    padding: 12px 20px;
+    width: 90%;
+    max-width: 500px;
+    background-color: #29012f;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .btn:hover {
+    background-color: #500a62;
+  }
+
+  #result {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.8;
+    white-space: pre-line;
+    z-index: 1000;
+    display: none; /* 기본 숨김 */
+  }
+
+  /* 배경 이미지와 오버레이를 위한 ::before 가상 요소 */
+  #result::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('./result_image.png') no-repeat center center;
+    background-size: cover;
+    filter: brightness(0.5); /* 이미지 어둡게 */
+    z-index: -1; /* 텍스트 뒤에 배치 */
+  }
+
+  #result > div {
+    max-width: 600px;
+    background: rgba(0,0,0,0.5); /* 반투명 검은 배경 */
+    padding: 20px;
+    border-radius: 15px;
+    box-sizing: border-box;
+  }
+</style>
+</head>
+<body>
+  <div class="container" id="quiz">
+    <h1>성인 여성 ADHD 자가진단</h1>
+    <div id="questionBox"></div>
+  </div>
+
+  <div id="result"><div></div></div>
+
+<script>
+  const questions = [
+    {
+      q: `"업무를 하던 중, 문득 다른 생각이 떠오른다. 창밖을 보거나 인터넷 창을 열다 보니 30분이 훌쩍 지나 있다."`,
+      a: "그런 일이 자주 있다. 집중이 산만해진다.",
+      b: "그런 경우는 드물다. 집중이 잘 되는 편이다."
+    },
+    {
+      q: `"오늘 안에 해야 할 일이 여러 개다. 뭐부터 하지?"`,
+      a: "정리가 안 되고 망설이다가 시간만 흐른다.",
+      b: "할 일을 빠르게 분류하고 하나씩 처리한다."
+    },
+    {
+      q: `"일이 미뤄져 결국 또 마감 하루 전이다."`,
+      a: "항상 이렇다. 벼락치기지만 그게 익숙하다.",
+      b: "드물다. 평소에 미리 해두는 편이다."
+    },
+    {
+      q: `"작은 실수를 하고 나서 상사가 지적한다."`,
+      a: "지나치게 자책하고 한참 동안 머릿속에서 맴돈다.",
+      b: "좀 신경 쓰이지만, 넘기고 다음을 생각한다."
+    },
+    {
+      q: `"친구와 만나기로 한 날. 갑자기 귀찮아지거나 기분이 왔다 갔다 한다."`,
+      a: "감정 변화로 인해 직전에 취소하고 싶어질 때도 있다.",
+      b: "그런 경우는 거의 없다. 일정에 맞춰 잘 움직인다."
+    },
+    {
+      q: `"생리 주기가 다가오면서 집중력과 감정 상태가 달라진다."`,
+      a: "확실히 더 힘들고 예민해지며 집중이 어려워진다.",
+      b: "크게 달라지는 느낌은 없다. 평소와 비슷하다."
+    },
+    {
+      q: `"방을 치우거나 짐을 정리하다 보면, 하나를 치우다 다른 걸 시작하고, 결국 끝이 안 날 때가 많다."`,
+      a: "맞다. 정리하다가 산만해지고 중간에 딴짓하다가 끝을 못 본다.",
+      b: "아니다. 정리는 비교적 계획대로 잘 끝낸다."
+    }
+  ];
+
+  let current = 0;
+  let score = 0;
+
+  function loadQuestion() {
+    const box = document.getElementById("questionBox");
+    if (current >= questions.length) {
+      showResult();
+      return;
+    }
+    const q = questions[current];
+    box.innerHTML = `
+      <div class="question"><strong>${current + 1}. </strong>${q.q}</div>
+      <button class="btn" onclick="selectAnswer(1)">a. ${q.a}</button>
+      <button class="btn" onclick="selectAnswer(0)">b. ${q.b}</button>
+    `;
+  }
+
+  function selectAnswer(value) {
+    score += value;
+    current++;
+    loadQuestion();
+  }
+
+  function showResult() {
+    document.getElementById("quiz").style.display = "none";
+    const result = document.getElementById("result");
+    let text = "";
+
+    if (score <= 2) {
+      text =
+        "✨ 당신은 비교적 일상에 안정감이 있어 보입니다.\n" +
+        "집중력, 감정 조절, 정리 능력에서 큰 어려움은 \n" +
+        "드러나지 않습니다.\n" +
+        "다만 누구나 때때로 산만하거나 감정 기복을 겪을 수 있어요.\n" +
+        "지금처럼 자기 점검을 하는 태도가 당신을 지켜줄 거예요.";
+    } else if (score <= 5) {
+      text =
+        "🔎 당신은 일상에서 산만함, 감정 기복, 자기 자책 등을\n" +
+        "자주 느끼고 있을 수 있어요.\n" +
+        "ADHD까진 아닐 수 있지만, 삶의 질에 영향을 주는\n" +
+        "어려움은 분명 존재합니다.\n" +
+        "특히 여성의 경우 이런 특성이 ‘성격 문제’로 오해되기 쉽죠.\n" +
+        "인터뷰 속 사람들과 비교해보며 더 깊이 이해해보세요.";
+    } else {
+      text =
+        "⚠ 당신은 지금 생활 전반에서 어려움을 겪고 있을 \n" +
+        "가능성이 높아요.\n" +
+        "ADHD의 특성과 여러 면에서 닮아 있습니다.\n" +
+        "중요한 건, 이건 당신의 잘못도, 의지 부족도.\n" +
+        "아니라는 점이에요.\n" +
+        "지금 느끼는 혼란에는 이유가 있을 수 있습니다.\n" +
+        "지금부터라도 도움을 구할 수 있어요.\n" +
+        "진단을 받아본 여성들의 이야기를 들어볼래요?";
+    }
+
+    result.querySelector("div").innerHTML = text.replace(/\n/g, "<br>");
+    result.style.display = "flex";
+  }
+
+  window.onload = loadQuestion;
+</script>
+</body>
+</html>
